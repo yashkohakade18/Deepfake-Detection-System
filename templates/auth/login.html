@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Login</h2>
+
+<form method="post" class="row" style="margin-top:10px;">
+  <div class="col">
+    <label>Email</label>
+    <input name="email" type="email" required autocomplete="username">
+  </div>
+  <div class="col">
+    <label>Password</label>
+    <input name="password" type="password" required autocomplete="current-password">
+  </div>
+
+  <div class="col" style="align-self:flex-end;">
+    <button class="btn" type="submit">Login</button>
+    &nbsp; <a href="{{ url_for('register') }}">No account? Register</a>
+  </div>
+</form>
+{% endblock %}

@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Deepfake Detector</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link rel="icon" href="data:,">
+  <style>
+    :root { --bg:#0f1224; --card:#171a31; --text:#e9ecff; --muted:#97a1ff; --accent:#6ea8fe; --ok:#35d07f; --bad:#ff6b6b; }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,Segoe UI,Roboto,Helvetica,Arial;background:linear-gradient(120deg,#0f1224,#111536);}
+    header,footer{color:var(--muted);padding:14px 22px}
+    .wrap{max-width:980px;margin:24px auto;padding:0 14px}
+    .card{background:var(--card);color:var(--text);border-radius:16px;padding:18px;box-shadow:0 10px 30px rgba(0,0,0,.35)}
+    a{color:var(--accent);text-decoration:none}
+    .btn{display:inline-block;padding:10px 14px;border-radius:10px;background:#2a2f57;color:#e9ecff}
+    .btn:hover{filter:brightness(1.1)}
+    .row{display:flex;flex-wrap:wrap;gap:16px}
+    .col{flex:1 1 320px}
+    input,select{width:100%;padding:10px;border-radius:10px;border:1px solid #333;background:#10142c;color:#e9ecff}
+    .topbar{display:flex;justify-content:space-between;align-items:center}
+    .alert{padding:10px 12px;border-radius:10px;margin:10px 0}
+    .alert.success{background:#11351f;color:#bff3d3}
+    .alert.danger{background:#3a1212;color:#ffc3c3}
+    .alert.warning{background:#3a2f12;color:#ffe4ab}
+    .pill{padding:4px 8px;border-radius:999px;background:#27305f;color:#cfe2ff;font-size:12px}
+    img{max-width:100%;height:auto;border-radius:10px}
+    .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+    .kv{display:flex;gap:10px;flex-wrap:wrap}
+    .kv span{background:#232a52;padding:6px 10px;border-radius:999px}
+
+    /* simple header nav */
+    .nav{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+    .nav a{padding:8px 10px;border-radius:10px;background:#202653;color:#e9ecff;border:1px solid #2a2f57}
+    .nav a:hover{filter:brightness(1.08)}
+  </style>
+</head>
+<body>
+<header>
+  <div class="wrap topbar">
+    <div class="nav">
+      <b style="margin-right:8px;">Deepfake Detector</b>
+      <!-- HEADER BUTTONS (added here) -->
+      <a href="{{ url_for('index') }}">Dashboard</a>
+      <a href="{{ url_for('detect_image') }}">Image Detection</a>
+      <a href="{{ url_for('detect_video') }}">Video Detection</a>
+      <a href="{{ url_for('tampering_page') }}">Video Tampering</a>
+    </div>
+    <div>
+      {% if session.user_id %}
+        <span class="pill">Hi, {{ session.user_name or 'User' }}</span>
+        &nbsp; <a class="btn" href="{{ url_for('logout') }}">Logout</a>
+      {% else %}
+        <a class="btn" href="{{ url_for('login') }}">Login</a>
+      {% endif %}
+    </div>
+  </div>
+</header>
+<main class="wrap">
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for cat, msg in messages %}
+        <div class="alert {{cat}}">{{ msg }}</div>
+      {% endfor %}
+    {% endif %}
+  {% endwith %}
+  <div class="card">
+    {% block content %}{% endblock %}
+  </div>
+</main>
+<footer>
+  <div class="wrap">© Xception/Grad-CAM visual explanations</div>
+</footer>
+</body>
+</html>

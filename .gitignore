@@ -1,0 +1,83 @@
+# ==========================
+# Python
+# ==========================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.egg-info/
+dist/
+build/
+eggs/
+*.egg
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+pip-delete-this-directory.txt
+
+# ==========================
+# ML Model Files (too large for GitHub)
+# ==========================
+*.h5
+*.hdf5
+*.pth
+*.pt
+*.onnx
+*.pb
+*.tflite
+*.savedmodel/
+*.pkl
+*.joblib
+
+# ==========================
+# Dataset / Media Files
+# ==========================
+fake/
+real/
+testing_images/
+output/
+video_out/
+video_results/
+video_frame_results/
+
+# ==========================
+# Runtime / Upload Directories
+# ==========================
+runs/
+web_runs/
+static/uploads/
+static/models/
+
+# ==========================
+# Database
+# ==========================
+*.db
+*.sqlite3
+
+# ==========================
+# IDE / Editor
+# ==========================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.settings/
+
+# ==========================
+# OS Files
+# ==========================
+.DS_Store
+Thumbs.db
+desktop.ini
+ehthumbs.db
+
+# ==========================
+# Misc
+# ==========================
+*.log
+*.csv
+*.tmp

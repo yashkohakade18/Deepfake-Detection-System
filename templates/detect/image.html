@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Image Detection</h2>
+
+<form method="post" enctype="multipart/form-data" class="row" style="margin-top:10px;">
+  <div class="col">
+    <label>Select Image</label>
+    <input type="file" name="image" accept=".png,.jpg,.jpeg,.bmp,.webp" required>
+  </div>
+  <div class="col" style="align-self:flex-end;">
+    <button class="btn" type="submit">Run Detection</button>
+  </div>
+</form>
+
+{% if result %}
+  <hr style="margin:18px 0;border-color:#2a2f57">
+
+  <div style="display:flex; gap:18px; flex-wrap:wrap; align-items:center;">
+    <span><b>Predicted:</b> {{ result.label }}</span>
+    <span><b>p_real:</b> {{ '%.3f'|format(result.p_real) }}</span>
+  </div>
+
+  <div style="display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:16px; margin-top:14px;">
+    <!-- Original uploaded image -->
+    <figure style="border:1px solid #333;border-radius:12px;padding:10px;background:#0f1020;">
+      {% set img_rel = result.image_path.replace('\\','/') %}
+      {% set img_tail = img_rel.split('uploads/')[1] %}
+      <img
+        src="{{ url_for('uploaded_file', filename=img_tail) }}"
+        alt="Uploaded image"
+        style="width:100%;height:auto;border-radius:8px;"
+        loading="lazy">
+      <figcaption style="margin-top:8px;font-size:0.95em;">
+        <b>Original image</b>
+      </figcaption>
+    </figure>
+
+    <!-- Grad-CAM / explanation figure saved by save_explain_figure -->
+    <figure style="border:1px solid #333;border-radius:12px;padding:10px;background:#0f1020;">
+      {% set fig_rel = (result.figure_rel or '').replace('\\','/') %}
+      {% if 'uploads/' in fig_rel %}
+        {% set fig_tail = fig_rel.split('uploads/')[1] %}
+        <img
+          src="{{ url_for('uploaded_file', filename=fig_tail) }}"
+          alt="Grad-CAM explanation figure"
+          style="width:100%;height:auto;border-radius:8px;"
+          loading="lazy">
+      {% else %}
+        <div style="padding:24px; text-align:center;">No explanation figure found.</div>
+      {% endif %}
+      <figcaption style="margin-top:8px;font-size:0.95em;line-height:1.4;">
+        <b>Explanation:</b> {{ result.explanation }}
+      </figcaption>
+    </figure>
+  </div>
+{% endif %}
+{% endblock %}

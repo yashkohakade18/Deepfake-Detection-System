@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Detection Dashboard</h2>
+<p>Choose a mode:</p>
+<div class="row" style="margin-top:10px;">
+  <div class="col">
+    <div class="card">
+      <h3>Single Image</h3>
+      <p>Upload an image — the app will run your model and render a Grad-CAM explanation figure.</p>
+      <a class="btn" href="{{ url_for('detect_image') }}">Go to Image Detection</a>
+    </div>
+  </div>
+  <div class="col">
+    <div class="card">
+      <h3>Video</h3>
+      <p>Upload a video — the app extracts frames every N seconds and generates Grad-CAM figures for each frame.</p>
+      <a class="btn" href="{{ url_for('detect_video') }}">Go to Video Detection</a>
+    </div>
+  </div>
+  <div class="col">
+    <div class="card">
+      <h3>Video Tampering</h3>
+      <p>Upload a video — the app checks for splices/edits with heatmaps and human-readable explanations.</p>
+      <a class="btn" href="{{ url_for('tampering_page') }}">Go to Video Tampering</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

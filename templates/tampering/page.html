@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>Video Tampering Detection</h2>
+
+<form method="post" enctype="multipart/form-data" class="row" style="margin-top:10px;">
+  <div class="col">
+    <label>Upload Video</label>
+    <input type="file" name="video" accept=".mp4,.avi,.mov,.mkv,.webm" required>
+  </div>
+  <div class="col" style="align-self:flex-end;">
+    <button class="btn" type="submit">Analyze (Explainable)</button>
+  </div>
+</form>
+
+{% if video_rel %}
+  {% set v_tail = video_rel.replace('\\','/').split('uploads/')[1] if 'uploads/' in video_rel else video_rel %}
+  <video src="{{ url_for('uploaded_file', filename=v_tail) }}"
+         controls style="width:100%; border-radius:10px; margin-top:12px;"></video>
+{% endif %}
+
+{% if majority %}
+  <div class="summary" style="margin-top:12px; padding:10px; border:1px solid #00ffaa44; border-radius:8px;">
+    Overall decision:
+    {% if majority == 'real' %}
+      <b style="color:#7CFC00;">REAL</b>
+    {% else %}
+      <b style="color:#ff4d4d;">TAMPERED</b>
+    {% endif %}
+  </div>
+{% endif %}
+
+<h3 style="margin-top:16px; color:#00ffaa;">Explanations (Suspicious Frames)</h3>
+
+<div class="gallery" id="gallery"
+     style="display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:16px;">
+  {% set suspicious = labels | selectattr('heatmap_path') | list %}
+  {% if suspicious and suspicious|length > 0 %}
+    {% for item in labels if item.heatmap_path %}
+      {% set heat_rel = item.heatmap_path.replace('\\','/') %}
+      {% set heat_tail = heat_rel.split('uploads/')[1] if 'uploads/' in heat_rel else heat_rel %}
+
+      <figure style="border:1px solid #00ffaa22;border-radius:12px;padding:10px;background:#0f1020;">
+        <div style="position:relative; overflow:hidden; border-radius:8px;">
+          <span class="chip bad" style="position:absolute;left:8px;top:8px;background:#11131a;border:1px solid #ff4d4d88;color:#ffb0b0;padding:2px 6px;border-radius:6px;font-size:12px;">
+            {{ item.time }}s
+          </span>
+          <img
+            src="{{ url_for('uploaded_file', filename=heat_tail) }}"
+            alt="heatmap at {{ item.time }}s"
+            style="width:100%; height:auto; display:block; border-radius:8px; cursor:pointer;"
+            onclick="openModal('{{ item.frame_path }}','{{ item.heatmap_path }}','{{ item.time }}', {{ item.topk|tojson }}, '{{ item.label }}', {{ (item.explanation or '')|tojson }})">
+        </div>
+
+        <!-- CAPTION under each card -->
+        <figcaption style="margin-top:8px;font-size:0.95em;line-height:1.35;">
+          <b>Pred:</b>
+          {% if item.label == 'real' %}
+            <span style="color:#7CFC00;">REAL</span>
+          {% else %}
+            <span style="color:#ff4d4d;">TAMPERED ({{ item.label }})</span>
+          {% endif %}
+          {% if item.explanation %}
+            <br><b>Explanation:</b> {{ item.explanation }}
+          {% endif %}
+        </figcaption>
+
+        <div style="margin-top:8px;">
+          <a class="btn" href="javascript:void(0)"
+             onclick="openModal('{{ item.frame_path }}','{{ item.heatmap_path }}','{{ item.time }}', {{ item.topk|tojson }}, '{{ item.label }}', {{ (item.explanation or '')|tojson }})">
+             View large
+          </a>
+        </div>
+      </figure>
+    {% endfor %}
+  {% else %}
+    <p>No suspicious frames found (all predicted REAL).</p>
+  {% endif %}
+</div>
+
+<h3 style="margin-top:18px;">Frame-wise Logs</h3>
+<div class="logs" style="border:1px solid #00ffaa22; border-radius:8px; max-height:360px; overflow:auto;">
+  <ul id="logList" style="list-style:none; margin:0; padding:10px;">
+    {% if labels %}
+      {% for item in labels %}
+        <li style="background:#272b35; margin:6px 0; padding:10px 12px; border-left:4px solid {{ '#7CFC00' if item.label=='real' else '#ff4d4d' }};">
+          <b>{{ item.time }}s</b> →
+          {% if item.label == 'real' %}
+            <span style="color:#7CFC00;">real</span>
+          {% else %}
+            <span style="color:#ff4d4d;">tampered [{{ item.label }}]</span>
+            {% if item.heatmap_path %}
+              &nbsp;|&nbsp;
+              <a href="javascript:void(0)"
+                 onclick="openModal('{{ item.frame_path }}','{{ item.heatmap_path }}','{{ item.time }}', {{ item.topk|tojson }}, '{{ item.label }}', {{ (item.explanation or '')|tojson }})"
+                 style="color:#00ffaa; text-decoration:underline;">view proof</a>
+            {% endif %}
+            {% if item.explanation %}
+              <div class="why" style="margin-top:6px; font-size:13px; opacity:0.9;">Why: {{ item.explanation }}</div>
+            {% endif %}
+          {% endif %}
+        </li>
+      {% endfor %}
+    {% else %}
+      <li>No video analyzed yet.</li>
+    {% endif %}
+  </ul>
+</div>
+
+<!-- Modal -->
+<div class="modal" id="modal" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,.7); align-items:center; justify-content:center; padding:20px; z-index:999;">
+  <div class="modal-card" style="width:min(980px,96vw); background:#1c1e27; border:1px solid #00ffaa44; border-radius:12px; padding:16px;">
+    <button class="close" onclick="closeModal()" style="float:right; background:#ff4d4d; color:#fff; border:none; border-radius:8px; padding:6px 10px; cursor:pointer;">Close</button>
+    <h4 style="margin:0 0 10px 0; color:#00ffaa;">Why it’s tampered?
+      <span id="m_time"></span>s — <span id="m_label"></span>
+    </h4>
+    <div class="modal-grid" style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+      <div>
+        <h4>Original Frame</h4>
+        <img id="m_frame" src="" style="width:100%; border-radius:10px;" />
+      </div>
+      <div>
+        <h4>Grad-CAM Heatmap</h4>
+        <img id="m_heat" src="" style="width:100%; border-radius:10px;" />
+        <div class="scores" style="background:#11131a; padding:10px; border-radius:8px; border:1px solid #00ffaa22; margin-top:8px;">
+          <div id="m_scores"></div>
+          <div id="m_why" style="margin-top:8px; opacity:.95;"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+function toUploadsUrl(p) {
+  if (!p) return '';
+  p = (''+p).replace(/\\/g,'/');
+  let tail = p.includes('uploads/') ? p.split('uploads/')[1] : p;
+  return "{{ url_for('uploaded_file', filename='__TAIL__') }}".replace('__TAIL__', tail);
+}
+function openModal(frameSrc, heatSrc, time, topk, label, whyText) {
+  document.getElementById('m_frame').src = toUploadsUrl(frameSrc);
+  document.getElementById('m_heat').src  = toUploadsUrl(heatSrc);
+  document.getElementById('m_time').innerText = time;
+  document.getElementById('m_label').innerText = label;
+
+  const sdiv = document.getElementById('m_scores');
+  sdiv.innerHTML = ''; // cleared, no percentages
+  document.getElementById('m_why').textContent = whyText ? `Why: ${whyText}` : 'Why: (not available for REAL frames)';
+  document.getElementById('modal').style.display = 'flex';
+}
+function closeModal(){ document.getElementById('modal').style.display = 'none'; }
+</script>
+{% endblock %}

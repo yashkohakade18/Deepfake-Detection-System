@@ -92,8 +92,10 @@ python app.py
 Open your browser at `http://127.0.0.1:5000`
 
 ---
-## Sample UI
-![home page](dashboard.jpeg)
+<p align="center"><img width="120" height="170" align=center alt="NicotheoUiGIF" src="https://github.com/user-attachments/assets/d94d5b98-0eea-44f3-9242-81f8685d5bec" />
+</p>
+
+![](dashboard.jpeg)
 
 ![home page](image.jpeg)
 

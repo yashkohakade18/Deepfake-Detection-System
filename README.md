@@ -93,13 +93,13 @@ Open your browser at `http://127.0.0.1:5000`
 
 ---
 ## Sample UI
-![home page](dashboard.png)
+![home page](dashboard.jpeg)
 
-![home page](image.png)
+![home page](image.jpeg)
 
-![home page](video.png)
+![home page](video.jpeg)
 
-![home page](vt.png)
+![home page](vt.jpeg)
 
 ## 🖥️ Usage
 

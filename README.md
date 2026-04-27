@@ -92,6 +92,14 @@ python app.py
 Open your browser at `http://127.0.0.1:5000`
 
 ---
+## Sample UI
+![home page](dashboard.png)
+
+![home page](image.png)
+
+![home page](video.png)
+
+![home page](vt.png)
 
 ## 🖥️ Usage
 
